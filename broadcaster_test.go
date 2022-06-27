@@ -8,13 +8,13 @@ import (
 func TestBroadcast(t *testing.T) {
 	wg := sync.WaitGroup{}
 
-	b := NewBroadcaster(100)
+	b := NewBroadcaster[int](100)
 	defer b.Close()
 
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 
-		cch := make(chan interface{})
+		cch := make(chan int)
 
 		b.Register(cch)
 
@@ -32,7 +32,7 @@ func TestBroadcast(t *testing.T) {
 }
 
 func TestBroadcastTrySubmit(t *testing.T) {
-	b := NewBroadcaster(1)
+	b := NewBroadcaster[int](1)
 	defer b.Close()
 
 	if ok := b.TrySubmit(0); !ok {
@@ -43,7 +43,7 @@ func TestBroadcastTrySubmit(t *testing.T) {
 		t.Fatalf("2nd TrySubmit assert error expect=false actual=%v", ok)
 	}
 
-	cch := make(chan interface{})
+	cch := make(chan int)
 	b.Register(cch)
 
 	if ok := b.TrySubmit(1); !ok {
@@ -52,8 +52,8 @@ func TestBroadcastTrySubmit(t *testing.T) {
 }
 
 func TestBroadcastCleanup(t *testing.T) {
-	b := NewBroadcaster(100)
-	b.Register(make(chan interface{}))
+	b := NewBroadcaster[int](100)
+	b.Register(make(chan int))
 	b.Close()
 }
 
@@ -79,7 +79,7 @@ func BenchmarkDirectSend(b *testing.B) {
 func BenchmarkBrodcast(b *testing.B) {
 	chout := make(chan interface{})
 
-	bc := NewBroadcaster(0)
+	bc := NewBroadcaster[interface{}](0)
 	defer bc.Close()
 	bc.Register(chout)
 
@@ -107,7 +107,7 @@ func BenchmarkParallelDirectSend(b *testing.B) {
 func BenchmarkParallelBrodcast(b *testing.B) {
 	chout := make(chan interface{})
 
-	bc := NewBroadcaster(0)
+	bc := NewBroadcaster[interface{}](0)
 	defer bc.Close()
 	bc.Register(chout)
 
